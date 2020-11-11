@@ -1,0 +1,2 @@
+include versioneer.py
+include slurmworm/_version.py

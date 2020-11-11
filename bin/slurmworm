@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+from slurmworm import listen
+import telegram
+import os
+import yaml
+
+
+path = os.path.join(os.path.expanduser("~"), ".config","slurmworm", "access.yaml")
+
+with open(path) as f:
+     access = yaml.load(f, Loader=yaml.SafeLoader)
+
+     token = access["token"]
+     chat_id = access["chat_id"]
+
+bot = telegram.Bot(token=token)
+
+bot.send_message(chat_id=chat_id, text='slurmwork has started blasting events to your earholes')
+
+listen()
