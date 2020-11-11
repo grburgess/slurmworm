@@ -1,6 +1,4 @@
-
-import imapclient
-
+import configparser as ConfigParser
 import email
 import logging
 import os.path as path
@@ -10,14 +8,10 @@ from datetime import datetime, time
 from logging.handlers import RotatingFileHandler
 from time import sleep
 
-import configparser as ConfigParser
-
-
+import imapclient
 
 from .bot import SlurmBot
 from .package_utils import get_imap_file
-
-
 
 # Setup the log handlers to stdout and file.
 log = logging.getLogger("imap_monitor")
@@ -45,7 +39,6 @@ log.addHandler(handler_file)
 bot = SlurmBot()
 
 
-
 def process_email(mail_, download_, log_):
     """Email processing to be done here. mail_ is the Mail object passed to this
     function. download_ is the path where attachments may be downloaded to.
@@ -58,8 +51,26 @@ def process_email(mail_, download_, log_):
 
     if "Slurm Job_id" in subject:
 
-        bot.speak(f"HOLY FUCK YOU MAIL SAYS:{mail_['subject']}")
-    
+        if "Failed" in subject:
+
+            _, run_time, reason, _ = subject.split(",")
+
+            message = f"FUCK!!!!\n{run_time}\nwhy:{reason}"
+
+        elif "Began" in subject:
+
+            _, qtime = subject.split(",")
+
+            message = f"Started\n{qtime}"
+
+        elif "Ended" in subject:
+
+            _, run_time, _, _ = subject.split(",")
+
+            message = f"Finished\n{run_time}"
+
+        bot.speak(message)
+
     return "return meaningful result here"
 
 
@@ -231,7 +242,7 @@ def listen():
                         "{0} new unread messages - {1}".format(len(result), result)
                     )
                     for each in result:
-                       
+
                         fetch = imap.fetch(each, ["RFC822"])
                         this_key = list(fetch[each].keys())[-1]
                         out = fetch[each][this_key]
