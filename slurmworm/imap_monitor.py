@@ -38,10 +38,10 @@ log.addHandler(handler_file)
 
 
 began_match = re.compile(
-    "(\w*) Slurm Job_id=(\d*) Name=(\w*) Began, Queued time (\d{2}:\d{2}:\d{2})"
+    "(\w*).*Slurm Job_id=(\d*) Name=(\w*) Began, Queued time (\d{2}:\d{2}:\d{2})"
 )
 failed_match = re.compile(
-    "(\w*) Slurm Job_id=(\d*) Name=(\w*) Failed, Run time (\d{2}:\d{2}:\d{2}), (\w*), ExitCode (\d*)"
+    "(\w*).*Slurm Job_id=(\d*) Name=(\w*) Failed, Run time (\d{2}:\d{2}:\d{2}), ([A-Z]*),.*ExitCode (\d*)"
 )
 ended_match = re.compile(
     "(\w*) Slurm Job_id=(\d*) Name=(\w*) Ended, Run time (\d{2}:\d{2}:\d{2}), (\w*), ExitCode (\d*)"
@@ -62,25 +62,27 @@ def process_email(mail_, download_, log_):
 
     if "Slurm Job_id" in subject:
 
+        subject = subject.replace("\n","").replace("\r","")
         if "Failed" in subject:
+            print("%r" % subject)
 
             server, jobid, name, run_time, reason, exitcode = failed_match.match(
                 subject
             ).groups()
 
-            message = f"FUCK! I failed!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime:{run_time}"
+            message = f"FUCK! I failed!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
 
         elif "Began" in subject:
 
-            server, jobid, name, qtime = began_match.match(subject)
+            server, jobid, name, qtime = began_match.match(subject).groups()
 
-            message = f"Job Started!\nServer: {server}\nJob: {name}\nQueuedtime:{qtime}"
+            message = f"Job Started!\nServer: {server}\nJob: {name}\nQueued time: {qtime}"
 
         elif "Ended" in subject:
 
-            server, jobid, name, run_time, reason, exitcode = ended_match.match(server)
+            server, jobid, name, run_time, reason, exitcode = ended_match.match(subject).groups()
 
-            message = f"Finished!!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime:{run_time}"
+            message = f"Finished!!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
 
         bot.speak(message)
 
