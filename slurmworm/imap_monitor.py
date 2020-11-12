@@ -23,7 +23,7 @@ handler_stdout.setLevel(logging.DEBUG)
 handler_stdout.setFormatter(formatter)
 log.addHandler(handler_stdout)
 handler_file = RotatingFileHandler(
-    path.join(get_path_of_user_dir(),"imap_monitor.log"),
+    path.join(get_path_of_user_dir(), "imap_monitor.log"),
     mode="a",
     maxBytes=1048576,
     backupCount=9,
@@ -62,7 +62,7 @@ def process_email(mail_, download_, log_):
 
     if "Slurm Job_id" in subject:
 
-        subject = subject.replace("\n","").replace("\r","")
+        subject = subject.replace("\n", "").replace("\r", "")
         if "Failed" in subject:
             print("%r" % subject)
 
@@ -76,11 +76,15 @@ def process_email(mail_, download_, log_):
 
             server, jobid, name, qtime = began_match.match(subject).groups()
 
-            message = f"Job Started!\nServer: {server}\nJob: {name}\nQueued time: {qtime}"
+            message = (
+                f"Job Started!\nServer: {server}\nJob: {name}\nQueued time: {qtime}"
+            )
 
         elif "Ended" in subject:
 
-            server, jobid, name, run_time, reason, exitcode = ended_match.match(subject).groups()
+            server, jobid, name, run_time, reason, exitcode = ended_match.match(
+                subject
+            ).groups()
 
             message = f"Finished!!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
 
@@ -228,8 +232,16 @@ def listen():
                 except Exception:
                     log.error("failed to fetch email - {0}".format(each))
                     continue
-                this_key = list(result[each].keys())[-1]
-                mail = email.message_from_string(result[each][this_key])
+
+                new_result = {}
+
+                for k, v in result[each].items():
+
+                    new_result[k.decode("utf-8")] = v
+
+                message = new_result["RFC822"]
+
+                mail = email.message_from_string(message)
                 try:
                     process_email(mail, download, log)
                     log.info("processing email {0} - {1}".format(each, mail["subject"]))
@@ -259,8 +271,15 @@ def listen():
                     for each in result:
 
                         fetch = imap.fetch(each, ["RFC822"])
-                        this_key = list(fetch[each].keys())[-1]
-                        out = fetch[each][this_key]
+                        new_result = {}
+
+                        for k, v in fetch[each].items():
+
+                            new_result[k.decode("utf-8")] = v
+                            
+                            
+                        out = new_result["RFC822"]
+
                         mail = email.message_from_string(out.decode("utf-8"))
                         try:
                             process_email(mail, download, log)
