@@ -12,7 +12,7 @@ from time import sleep
 import imapclient
 
 from .bot import SlurmBot
-from .package_utils import get_imap_file
+from .package_utils import get_imap_file, get_path_of_user_dir
 
 # Setup the log handlers to stdout and file.
 log = logging.getLogger("imap_monitor")
@@ -23,7 +23,7 @@ handler_stdout.setLevel(logging.DEBUG)
 handler_stdout.setFormatter(formatter)
 log.addHandler(handler_stdout)
 handler_file = RotatingFileHandler(
-    "imap_monitor.log",
+    path.join(get_path_of_user_dir(),"imap_monitor.log"),
     mode="a",
     maxBytes=1048576,
     backupCount=9,
