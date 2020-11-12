@@ -45,3 +45,14 @@ folder = INBOX
 [path]
 download = <where mail will be temporarily stored>
 ```
+
+## Running
+After you have installed and set everything up, just type
+```bash
+slurmworm
+```
+in a shell and it will run and monitor your email. 
+
+It is likely best to have this running in a tmux shell you can disconnect from.
+
+May all your jobs exit 0!
