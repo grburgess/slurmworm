@@ -276,8 +276,7 @@ def listen():
                         for k, v in fetch[each].items():
 
                             new_result[k.decode("utf-8")] = v
-                            
-                            
+
                         out = new_result["RFC822"]
 
                         mail = email.message_from_string(out.decode("utf-8"))
