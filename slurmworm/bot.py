@@ -20,8 +20,9 @@ else:
 
     _DEBUG = False
 
+
 class Bot(object):
-    def __init__(self, name, token, chat_id):
+    def __init__(self, name, token, chat_id, identify=True):
         """
         A generic telegram bot
 
@@ -41,7 +42,12 @@ class Bot(object):
 
         self._bot = telegram.Bot(token=token)
 
-        self._msg_header = f"{self._name} says:\n"
+        if identify:
+            self._msg_header = f"{self._name} says:\n"
+
+        else:
+
+            self._msg_header = ""
 
     def speak(self, message):
         """
@@ -84,19 +90,18 @@ class SlurmBot(Bot):
         """
         A Slurm bot
 
-        :returns: 
-        :rtype: 
+        :returns:
+        :rtype:
 
         """
 
         token = None
         chat_id = None
 
-        
         access = get_access_file()
         chat_id = access["chat_id"]
         token = access["token"]
 
-        super(SlurmBot, self).__init__(name="SLURM", token=token, chat_id=chat_id)
-
-        
+        super(SlurmBot, self).__init__(
+            name="SLURM", token=token, chat_id=chat_id, identify=False
+        )
