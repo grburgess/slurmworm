@@ -62,6 +62,8 @@ def process_email(mail_, download_, log_):
 
     if "Slurm Job_id" in subject:
 
+        print("%r" % subject)
+
         subject = subject.replace("\n", "").replace("\r", "")
         if "Failed" in subject:
             print("%r" % subject)
