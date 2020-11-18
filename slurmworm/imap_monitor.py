@@ -243,11 +243,21 @@ def listen():
 
                 message = new_result["RFC822"]
 
-                mail = email.message_from_string(message)
                 try:
+                    message = message.decode("utf-8")
+
+                except:
+
+                    message = new_result["RFC822"]
+
+                try:
+                    mail = email.message_from_string(message)
                     process_email(mail, download, log)
                     log.info("processing email {0} - {1}".format(each, mail["subject"]))
                 except Exception:
+                    bot.speak(
+                        "processing email {0} - {1}".format(each, mail["subject"])
+                    )
                     log.error("failed to process email {0}".format(each))
                     raise
                     continue
@@ -290,6 +300,7 @@ def listen():
                                 )
                             )
                         except Exception:
+                            bot.speak("failed to process email {0}".format(each))
                             log.error("failed to process email {0}".format(each))
                             raise
                             continue
@@ -304,7 +315,9 @@ def listen():
             break
 
         # End of configuration section --->
+        bot.speak("LEAVING!")
         break
+    bot.speak("LEAVING!")
     log.info("script stopped ...")
 
 
