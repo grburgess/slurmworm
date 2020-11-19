@@ -305,9 +305,14 @@ def listen():
                             raise
                             continue
                 else:
-                    imap.idle_done()
-                    imap.noop()
-                    log.info("no new messages seen")
+                    try:
+                        imap.idle_done()
+                        imap.noop()
+                        log.info("no new messages seen")
+
+                    except:
+                        bot.speak("I AM DYING")
+                        
                 # End of mail monitoring loop --->
                 continue
 
