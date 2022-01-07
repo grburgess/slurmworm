@@ -302,10 +302,12 @@ def listen():
                         except Exception:
                             bot.speak("failed to process email {0}".format(each))
                             log.error("failed to process email {0}".format(each))
-                            raise
+                            #raise
                             continue
                 else:
                     try:
+
+
                         imap.idle_done()
                         imap.noop()
                         log.info("no new messages seen")
