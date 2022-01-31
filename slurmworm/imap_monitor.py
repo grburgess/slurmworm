@@ -62,33 +62,60 @@ def process_email(mail_, download_, log_):
 
     if "Slurm Job_id" in subject:
 
+
+
         print("%r" % subject)
 
         subject = subject.replace("\n", "").replace("\r", "")
+
         if "Failed" in subject:
             print("%r" % subject)
 
-            server, jobid, name, run_time, reason, exitcode = failed_match.match(
-                subject
-            ).groups()
+            try:
 
-            message = f"FUCK! I failed!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
+                server, jobid, name, run_time, reason, exitcode = failed_match.match(
+                    subject
+                ).groups()
+
+                message = f"FUCK! I failed!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
+
+            except:
+
+                continue
+
+
 
         elif "Began" in subject:
 
-            server, jobid, name, qtime = began_match.match(subject).groups()
 
-            message = (
-                f"Job Started!\nServer: {server}\nJob: {name}\nQueued time: {qtime}"
-            )
+            try:
+
+                server, jobid, name, qtime = began_match.match(subject).groups()
+
+                message = (
+                    f"Job Started!\nServer: {server}\nJob: {name}\nQueued time: {qtime}"
+                )
+
+
+            except:
+
+                continue
+
 
         elif "Ended" in subject:
 
-            server, jobid, name, run_time, reason, exitcode = ended_match.match(
-                subject
-            ).groups()
 
-            message = f"Finished!!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
+            try:
+
+                server, jobid, name, run_time, reason, exitcode = ended_match.match(
+                    subject
+                ).groups()
+
+                message = f"Finished!!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
+
+            except:
+
+                continue
 
         bot.speak(message)
 
