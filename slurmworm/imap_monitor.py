@@ -81,7 +81,7 @@ def process_email(mail_, download_, log_):
 
             except:
 
-                continue
+                pass
 
 
 
@@ -99,7 +99,7 @@ def process_email(mail_, download_, log_):
 
             except:
 
-                continue
+                pass
 
 
         elif "Ended" in subject:
@@ -115,7 +115,7 @@ def process_email(mail_, download_, log_):
 
             except:
 
-                continue
+                pass
 
         bot.speak(message)
 
