@@ -27,7 +27,7 @@ log = logging.getLogger("imap_monitor")
 log.setLevel(logging.DEBUG)
 
 handler_stdout = RichHandler(
-    level="DEBUG"
+    level="DEBUG",
     rich_tracebacks=True,
     markup=True,
 )
