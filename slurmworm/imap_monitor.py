@@ -17,7 +17,9 @@ from .package_utils import get_imap_file, get_path_of_user_dir
 # Setup the log handlers to stdout and file.
 log = logging.getLogger("imap_monitor")
 log.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
+)
 handler_stdout = logging.StreamHandler(sys.stdout)
 handler_stdout.setLevel(logging.DEBUG)
 handler_stdout.setFormatter(formatter)
@@ -40,6 +42,11 @@ log.addHandler(handler_file)
 began_match = re.compile(
     "(\w*).*Slurm Job_id=(\d*) Name=(\w*) Began, Queued time (\d{2}:\d{2}:\d{2})"
 )
+
+began_array_match = re.compile(
+    "(\w*).*Slurm Array Summary Job_id=(\S*) \((\d*)\) Name=(\w*) Began"
+)
+
 failed_match = re.compile(
     "(\w*).*Slurm Job_id=(\d*) Name=(\w*) Failed, Run time (\d{2}:\d{2}:\d{2}), ([A-Z]*),.*ExitCode (\d*)"
 )
@@ -62,8 +69,6 @@ def process_email(mail_, download_, log_):
 
     if "Slurm Job_id" in subject:
 
-
-
         print("%r" % subject)
 
         subject = subject.replace("\n", "").replace("\r", "")
@@ -73,9 +78,14 @@ def process_email(mail_, download_, log_):
 
             try:
 
-                server, jobid, name, run_time, reason, exitcode = failed_match.match(
-                    subject
-                ).groups()
+                (
+                    server,
+                    jobid,
+                    name,
+                    run_time,
+                    reason,
+                    exitcode,
+                ) = failed_match.match(subject).groups()
 
                 message = f"FUCK! I failed!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
 
@@ -83,33 +93,40 @@ def process_email(mail_, download_, log_):
 
                 pass
 
-
-
         elif "Began" in subject:
-
 
             try:
 
                 server, jobid, name, qtime = began_match.match(subject).groups()
 
-                message = (
-                    f"Job Started!\nServer: {server}\nJob: {name}\nQueued time: {qtime}"
-                )
-
+                message = f"Job Started!\nServer: {server}\nJob: {name}\nQueued time: {qtime}"
 
             except:
 
-                pass
+                try:
 
+                    server, _, jobid, name = began_array_match.match(
+                        subject
+                    ).groups()
+
+                    message = f"Job Started!\nServer: {server}\nJob: {name}}"
+
+                except:
+
+                    pass
 
         elif "Ended" in subject:
 
-
             try:
 
-                server, jobid, name, run_time, reason, exitcode = ended_match.match(
-                    subject
-                ).groups()
+                (
+                    server,
+                    jobid,
+                    name,
+                    run_time,
+                    reason,
+                    exitcode,
+                ) = ended_match.match(subject).groups()
 
                 message = f"Finished!!\nServer: {server}\nJob: {name}\nReason: {reason}\nRuntime: {run_time}"
 
@@ -254,7 +271,9 @@ def listen():
                 result = imap.search("UNSEEN")
             except Exception:
                 continue
-            log.info("{0} unread messages seen - {1}".format(len(result), result))
+            log.info(
+                "{0} unread messages seen - {1}".format(len(result), result)
+            )
             for each in result:
                 try:
                     result = imap.fetch(each, ["RFC822"])
@@ -280,10 +299,16 @@ def listen():
                 try:
                     mail = email.message_from_string(message)
                     process_email(mail, download, log)
-                    log.info("processing email {0} - {1}".format(each, mail["subject"]))
+                    log.info(
+                        "processing email {0} - {1}".format(
+                            each, mail["subject"]
+                        )
+                    )
                 except Exception:
                     bot.speak(
-                        "processing email {0} - {1}".format(each, mail["subject"])
+                        "processing email {0} - {1}".format(
+                            each, mail["subject"]
+                        )
                     )
                     log.error("failed to process email {0}".format(each))
                     raise
@@ -311,7 +336,6 @@ def listen():
 
                     time.sleep(5)
 
-
                 # TODO: Remove hard-coded IDLE timeout; place in config file
                 result = imap.idle_check(5 * 60)
 
@@ -319,7 +343,9 @@ def listen():
                     imap.idle_done()
                     result = imap.search("UNSEEN")
                     log.info(
-                        "{0} new unread messages - {1}".format(len(result), result)
+                        "{0} new unread messages - {1}".format(
+                            len(result), result
+                        )
                     )
                     for each in result:
 
@@ -341,13 +367,16 @@ def listen():
                                 )
                             )
                         except Exception:
-                            bot.speak("failed to process email {0}".format(each))
-                            log.error("failed to process email {0}".format(each))
-                            #raise
+                            bot.speak(
+                                "failed to process email {0}".format(each)
+                            )
+                            log.error(
+                                "failed to process email {0}".format(each)
+                            )
+                            # raise
                             continue
                 else:
                     try:
-
 
                         imap.idle_done()
                         imap.noop()
@@ -355,7 +384,7 @@ def listen():
 
                     except:
                         bot.speak("I AM DYING")
-                        
+
                 # End of mail monitoring loop --->
                 continue
 
