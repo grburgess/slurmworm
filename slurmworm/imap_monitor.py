@@ -16,10 +16,9 @@ from .bot import SlurmBot
 from .package_utils import get_imap_file, get_path_of_user_dir
 
 formatter = logging.Formatter(
-    ' %(message)s',
+    " %(message)s",
     datefmt="%H:%M:%S",
 )
-
 
 
 # Setup the log handlers to stdout and file.
@@ -111,7 +110,7 @@ def process_email(mail_, download_, log_):
                         subject
                     ).groups()
 
-                    message = f"Job Started!\nServer: {server}\nJob: {name}}"
+                    message = f"Job Started!\nServer: {server}\nJob: {name}"
 
                 except:
 
