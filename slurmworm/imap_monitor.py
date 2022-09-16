@@ -10,31 +10,33 @@ from logging.handlers import RotatingFileHandler
 from time import sleep
 
 import imapclient
+from rich.logging import RichHandler
 
 from .bot import SlurmBot
 from .package_utils import get_imap_file, get_path_of_user_dir
 
+formatter = logging.Formatter(
+    ' %(message)s',
+    datefmt="%H:%M:%S",
+)
+
+
+
 # Setup the log handlers to stdout and file.
 log = logging.getLogger("imap_monitor")
 log.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
+
+handler_stdout = RichHandler(
+    level="DEBUG"
+    rich_tracebacks=True,
+    markup=True,
 )
-handler_stdout = logging.StreamHandler(sys.stdout)
+
+
 handler_stdout.setLevel(logging.DEBUG)
 handler_stdout.setFormatter(formatter)
 log.addHandler(handler_stdout)
-handler_file = RotatingFileHandler(
-    path.join(get_path_of_user_dir(), "imap_monitor.log"),
-    mode="a",
-    maxBytes=1048576,
-    backupCount=9,
-    encoding="UTF-8",
-    delay=True,
-)
-handler_file.setLevel(logging.DEBUG)
-handler_file.setFormatter(formatter)
-log.addHandler(handler_file)
+
 
 # TODO: Support SMTP log handling for CRITICAL errors.
 
