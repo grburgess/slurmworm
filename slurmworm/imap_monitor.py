@@ -298,9 +298,23 @@ def listen():
                 # to refresh. Should errors occur in this loop (due to loss of
                 # connection), return control to IMAP server connection loop to
                 # attempt restablishing connection instead of halting script.
-                imap.idle()
+
+                try:
+
+                    imap.idle()
+
+                except:
+
+                    bot.speak("Something is up!")
+
+                    log.error("something is up!")
+
+                    time.sleep(5)
+
+
                 # TODO: Remove hard-coded IDLE timeout; place in config file
                 result = imap.idle_check(5 * 60)
+
                 if result:
                     imap.idle_done()
                     result = imap.search("UNSEEN")
