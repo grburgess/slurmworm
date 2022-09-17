@@ -51,9 +51,16 @@ began_array_match = re.compile(
 failed_match = re.compile(
     "(\w*).*Slurm Job_id=(\d*) Name=(\w*) Failed, Run time (\d{2}:\d{2}:\d{2}), ([A-Z]*),.*ExitCode (\d*)"
 )
+
 ended_match = re.compile(
     "(\w*) Slurm Job_id=(\d*) Name=(\w*) Ended, Run time (\d{2}:\d{2}:\d{2}), (\w*), ExitCode (\d*)"
 )
+
+
+ended_array_match = re.compile(
+    "(\w*) Slurm Array Summary Job_id=(\S*) \((\d*)\) Name=(\w*) Ended, (\w*)"
+)
+
 
 bot = SlurmBot()
 
@@ -106,11 +113,13 @@ def process_email(mail_, download_, log_):
 
                 try:
 
-                    server, _, jobid, name = began_array_match.match(
-                        subject
-                    ).groups()
+                    # server, _, jobid, name = began_array_match.match(
+                    #     subject
+                    # ).groups()
 
-                    message = f"Job Started!\nServer: {server}\nJob: {name}"
+                    # message = f"Job Started!\nServer: {server}\nJob: {name}"
+
+                    message = f"Started:\n{subject}"
 
                 except Exception as e:
 
@@ -133,7 +142,11 @@ def process_email(mail_, download_, log_):
 
             except:
 
-                pass
+                if "Array" in subject:
+
+                    message = f"Finshed:\n{subject}"
+
+                
 
         bot.speak(message)
 
