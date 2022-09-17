@@ -112,9 +112,9 @@ def process_email(mail_, download_, log_):
 
                     message = f"Job Started!\nServer: {server}\nJob: {name}"
 
-                except:
+                except Exception as e:
 
-                    pass
+                    log.error(e)
 
         elif "Ended" in subject:
 
