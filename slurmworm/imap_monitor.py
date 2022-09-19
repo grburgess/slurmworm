@@ -75,7 +75,7 @@ def process_email(mail_, download_, log_):
 
     subject = mail_["subject"]
 
-    if "Slurm Job_id" in subject:
+    if "Slurm" in subject:
 
         print("%r" % subject)
 
@@ -113,13 +113,11 @@ def process_email(mail_, download_, log_):
 
                 try:
 
-                    # server, _, jobid, name = began_array_match.match(
-                    #     subject
-                    # ).groups()
+                    server, _, jobid, name = began_array_match.match(
+                        subject
+                    ).groups()
 
-                    # message = f"Job Started!\nServer: {server}\nJob: {name}"
-
-                    message = f"Started:\n{subject}"
+                    message = f"Job Started!\nServer: {server}\nJob: {name}"
 
                 except Exception as e:
 
