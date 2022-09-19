@@ -58,7 +58,7 @@ ended_match = re.compile(
 
 
 ended_array_match = re.compile(
-    "(\w*) Slurm Array Summary Job_id=(\S*) \((\d*)\) Name=(\w*) Ended, (\w*)"
+    "(\w*) Slurm Array Summary Job_id=(\S*) \((\d*)\) Name=(\w*) Ended"
 )
 
 
@@ -71,13 +71,13 @@ def process_email(mail_, download_, log_):
     log_ is the logger object.
 
     """
-    log_.info(mail_["subject"])
+    log.info(mail_["subject"])
 
     subject = mail_["subject"]
 
     if "Slurm" in subject:
 
-        print("%r" % subject)
+        log.info("[blink]SLURM EMAIL DETECTED[/blink]")
 
         subject = subject.replace("\n", "").replace("\r", "")
 
@@ -140,11 +140,15 @@ def process_email(mail_, download_, log_):
 
             except:
 
+                server, _, jobid, name = began_array_match.match(
+                    subject
+                ).groups()
+
+                message = f"Job ENDED!\nServer: {server}\nJob: {name}"
+
                 if "Array" in subject:
 
                     message = f"Finshed:\n{subject}"
-
-                
 
         bot.speak(message)
 
@@ -152,7 +156,9 @@ def process_email(mail_, download_, log_):
 
 
 def listen():
+
     log.info("... script started")
+
     while True:
         # <--- Start of configuration section
 
@@ -160,53 +166,81 @@ def listen():
         try:
             config_file = open(get_imap_file(), "r+")
         except IOError:
+
             log.critical("configuration file is missing")
+
             break
         config = ConfigParser.SafeConfigParser()
+
         config.readfp(config_file)
 
         # Retrieve IMAP host - halt script if section 'imap' or value
         # missing
         try:
             host = config.get("imap", "host")
+
         except ConfigParser.NoSectionError:
+
             log.critical('no "imap" section in configuration file')
+
             break
+
         except ConfigParser.NoOptionError:
+
             log.critical("no IMAP host specified in configuration file")
+
             break
 
         # Retrieve IMAP username - halt script if missing
         try:
             username = config.get("imap", "username")
+
         except ConfigParser.NoOptionError:
+
             log.critical("no IMAP username specified in configuration file")
+
             break
 
         # Retrieve IMAP password - halt script if missing
         try:
+
             password = config.get("imap", "password")
+
         except ConfigParser.NoOptionError:
+
             log.critical("no IMAP password specified in configuration file")
+
             break
 
         # Retrieve IMAP SSL setting - warn if missing, halt if not boolean
         try:
+
             ssl = config.getboolean("imap", "ssl")
+
         except ConfigParser.NoOptionError:
+
             # Default SSL setting to False if missing
+
             log.warning("no IMAP SSL setting specified in configuration file")
+
             ssl = False
+
         except ValueError:
+
             log.critical("IMAP SSL setting invalid - not boolean")
+
             break
 
         # Retrieve IMAP folder to monitor - warn if missing
         try:
+
             folder = config.get("imap", "folder")
+
         except ConfigParser.NoOptionError:
+
             # Default folder to monitor to 'INBOX' if missing
             log.warning("no IMAP folder specified in configuration file")
+
             folder = "INBOX"
 
         # Retrieve path for downloads - halt if section of value missing
@@ -229,10 +263,12 @@ def listen():
         log.info("setting path for email downloads - {0}".format(download))
 
         while True:
+
             # <--- Start of IMAP server connection loop
 
             # Attempt connection to IMAP server
-            log.info("connecting to IMAP server - {0}".format(host))
+            log.info(f"connecting to IMAP server - {host}")
+
             try:
                 imap = imapclient.IMAPClient(host, use_uid=True, ssl=True)
             except Exception:
@@ -245,13 +281,18 @@ def listen():
                 log.error(logstr)
                 sleep(10)
                 continue
-            log.info("server connection established")
+
+            log.info("server connection [green]established[/green]")
 
             # Attempt login to IMAP server
-            log.info("logging in to IMAP server - {0}".format(username))
+            log.info(f"logging in to IMAP server - [green]{username}[/green]")
+
             try:
+
                 result = imap.login(username, password)
-                log.info("login successful - {0}".format(result))
+
+                log.info(f"login successful - {result}")
+
             except Exception:
                 # Halt script when login fails
                 etype, evalue = sys.exc_info()[:2]
@@ -263,15 +304,21 @@ def listen():
                 break
 
             # Select IMAP folder to monitor
-            log.info("selecting IMAP folder - {0}".format(folder))
+            log.info(f"selecting IMAP folder - [green]{folder}[/green]")
+
             try:
+
                 result = imap.select_folder(folder)
+
                 log.info("folder selected")
+
             except Exception:
+
                 # Halt script when folder selection fails
                 etype, evalue = sys.exc_info()[:2]
                 estr = traceback.format_exception_only(etype, evalue)
                 logstr = "failed to select IMAP folder - "
+
                 for each in estr:
                     logstr += "{0}; ".format(each.strip("\n"))
                 log.critical(logstr)
@@ -283,14 +330,12 @@ def listen():
                 result = imap.search("UNSEEN")
             except Exception:
                 continue
-            log.info(
-                "{0} unread messages seen - {1}".format(len(result), result)
-            )
+            log.info(f"{len(result)} unread messages seen - {result}")
             for each in result:
                 try:
                     result = imap.fetch(each, ["RFC822"])
                 except Exception:
-                    log.error("failed to fetch email - {0}".format(each))
+                    log.error(f"failed to fetch email - {each}")
                     continue
 
                 new_result = {}
@@ -311,19 +356,25 @@ def listen():
                 try:
                     mail = email.message_from_string(message)
                     process_email(mail, download, log)
-                    log.info(
-                        "processing email {0} - {1}".format(
-                            each, mail["subject"]
-                        )
-                    )
+
+                    subject = mail["subject"]
+
+                    message = f"processing email {each} - {subject}"
+
+                    log.info(message)
+
                 except Exception:
-                    bot.speak(
-                        "processing email {0} - {1}".format(
-                            each, mail["subject"]
-                        )
-                    )
-                    log.error("failed to process email {0}".format(each))
-                    raise
+
+                    subject = mail["subject"]
+
+                    message = f"processing email {each} - {subject}"
+
+                    bot.speak("Error processing mail")
+
+                    bot.speak(message)
+
+                    log.error(f"failed to process email {each}")
+
                     continue
 
             while True:
@@ -349,16 +400,17 @@ def listen():
                     time.sleep(5)
 
                 # TODO: Remove hard-coded IDLE timeout; place in config file
+
                 result = imap.idle_check(5 * 60)
 
                 if result:
+
                     imap.idle_done()
+
                     result = imap.search("UNSEEN")
-                    log.info(
-                        "{0} new unread messages - {1}".format(
-                            len(result), result
-                        )
-                    )
+
+                    log.info(f"{len(result)} new unread messages - {result}")
+
                     for each in result:
 
                         fetch = imap.fetch(each, ["RFC822"])
@@ -371,23 +423,28 @@ def listen():
                         out = new_result["RFC822"]
 
                         mail = email.message_from_string(out.decode("utf-8"))
+
+                        subject = mail["subject"]
+
                         try:
+
                             process_email(mail, download, log)
-                            log.info(
-                                "processing email {0} - {1}".format(
-                                    each, mail["subject"]
-                                )
-                            )
+
+                            message = f"processing email {each} - {subject}"
+
+                            log.info(message)
+
                         except Exception:
-                            bot.speak(
-                                "failed to process email {0}".format(each)
-                            )
-                            log.error(
-                                "failed to process email {0}".format(each)
-                            )
+
+                            message = f"failed to process email {each}"
+
+                            bot.speak(message)
+
+                            log.error(message)
                             # raise
                             continue
                 else:
+
                     try:
 
                         imap.idle_done()
@@ -395,13 +452,11 @@ def listen():
                         log.info("no new messages seen")
 
                     except:
+
                         bot.speak("I AM DYING")
 
                 # End of mail monitoring loop --->
                 continue
-
-            # End of IMAP server connection loop --->
-            break
 
         # End of configuration section --->
         bot.speak("LEAVING!")
