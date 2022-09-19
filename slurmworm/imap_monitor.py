@@ -142,7 +142,7 @@ def process_email(mail_, download_, log_):
 
                 try:
 
-                    server, _, jobid, name = began_array_match.match(
+                    server, _, jobid, name = ended_array_match.match(
                         subject
                     ).groups()
 
