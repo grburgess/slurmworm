@@ -140,15 +140,17 @@ def process_email(mail_, download_, log_):
 
             except:
 
-                server, _, jobid, name = began_array_match.match(
-                    subject
-                ).groups()
+                try:
 
-                message = f"Job ENDED!\nServer: {server}\nJob: {name}"
+                    server, _, jobid, name = began_array_match.match(
+                        subject
+                    ).groups()
 
-                if "Array" in subject:
+                    message = f"Job ENDED!\nServer: {server}\nJob: {name}"
 
-                    message = f"Finshed:\n{subject}"
+                except Exception as e:
+
+                    log.error(e)
 
         bot.speak(message)
 
