@@ -5,16 +5,39 @@ import os
 import yaml
 
 
-path = os.path.join(os.path.expanduser("~"), ".config","slurmworm", "access.yaml")
+path = os.path.join(
+    os.path.expanduser("~"), ".config", "slurmworm", "access.yaml"
+)
 
 with open(path) as f:
-     access = yaml.load(f, Loader=yaml.SafeLoader)
+    access = yaml.load(f, Loader=yaml.SafeLoader)
 
-     token = access["token"]
-     chat_id = access["chat_id"]
+    token = access["token"]
+    chat_id = access["chat_id"]
 
 bot = telegram.Bot(token=token)
 
-bot.send_message(chat_id=chat_id, text='slurmwork has started blasting events to your earholes')
+bot.send_message(
+    chat_id=chat_id,
+    text="slurmwork has started blasting events to your earholes",
+)
 
-listen()
+max_attempts = 10
+
+attempts = 0
+
+
+while attempts < max_attempts:
+
+    try:
+
+         listen()
+
+    except Exception as e:
+
+        bot.send_message("Something went wrong!")
+        bot.send_message(f"{e}")
+
+        attempts += 1
+
+        bot.send_message(f"will try to restart {max_attempts - attempts} more times")
