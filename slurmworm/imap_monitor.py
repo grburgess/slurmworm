@@ -5,9 +5,10 @@ import os.path as path
 import re
 import sys
 import traceback
+from time import sleep
 from datetime import datetime, time
 from logging.handlers import RotatingFileHandler
-from time import sleep
+
 
 import imapclient
 from rich.logging import RichHandler
@@ -399,7 +400,7 @@ def listen():
 
                     log.error("something is up!")
 
-                    time.sleep(5)
+                    sleep(5)
 
                 # TODO: Remove hard-coded IDLE timeout; place in config file
 
