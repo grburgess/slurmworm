@@ -31,13 +31,16 @@ while attempts < max_attempts:
 
     try:
 
-         listen()
+        listen()
 
     except Exception as e:
 
-        bot.send_message("Something went wrong!")
-        bot.send_message(f"{e}")
+        bot.send_messag(chat_id=chat_id, text="Something went wrong!")
+        bot.send_message(chat_id=chat_id, text=f"{e}")
 
         attempts += 1
 
-        bot.send_message(f"will try to restart {max_attempts - attempts} more times")
+        bot.send_message(
+            chat_id=chat_id,
+            text=f"will try to restart {max_attempts - attempts} more times",
+        )
