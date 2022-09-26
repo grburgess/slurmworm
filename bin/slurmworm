@@ -35,7 +35,7 @@ while attempts < max_attempts:
 
     except Exception as e:
 
-        bot.send_messag(chat_id=chat_id, text="Something went wrong!")
+        bot.send_message(chat_id=chat_id, text="Something went wrong!")
         bot.send_message(chat_id=chat_id, text=f"{e}")
 
         attempts += 1
